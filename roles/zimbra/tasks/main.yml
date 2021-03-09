@@ -1,0 +1,49 @@
+---
+#
+# Validations before running the playbook
+################################################################################
+- name: Checking if there is an Zimbra OSE install already
+  command: getent passwd zimbra
+  register: getent_passwd
+  ignore_errors: true
+
+#
+# Installation
+################################################################################
+- import_tasks: 'tasks/vars-setup/{{zimbra_version}}.yml'
+  when: getent_passwd.rc == 2
+- import_tasks: 'tasks/install/dependencies.yml'
+  when: getent_passwd.rc == 2
+- import_tasks: 'tasks/install/zimbra.yml'
+  when: getent_passwd.rc == 2
+- import_tasks: 'tasks/install/policyd.yml'
+  when: zimbra_policyd == 'y'
+
+#
+# Configuration
+################################################################################
+- import_tasks: 'tasks/configure/proxy.yml'
+  when: zimbra_proxy == 'y'
+- import_tasks: 'tasks/configure/mailbox.yml'
+  when: zimbra_store == 'y'
+- import_tasks: 'tasks/configure/mta.yml'
+  when: zimbra_mta == 'y'
+
+#
+# Extras configuration
+################################################################################
+- import_tasks: 'tasks/extras/modify-logo.yml'
+  when: zmlogologin is defined and zmlogoapp is defined
+
+#
+# Restart Zimbra
+################################################################################
+- name: 'Reloading Zimbra OSE Services'
+  shell: source /opt/zimbra/.bashrc && ./zmcontrol restart
+  args:
+    executable: /bin/bash
+    chdir: '/opt/zimbra/bin/'
+  become: yes
+  become_user: zimbra
+  retries: 3
+...
