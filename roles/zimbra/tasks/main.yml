@@ -1,5 +1,11 @@
 ---
 #
+# Updating the system then doing a restart
+################################################################################
+- name: APT update
+  apt: upgrade=dist force_apt_get=yes
+
+#
 # Validations before running the playbook
 ################################################################################
 - name: Checking if there is an Zimbra OSE install already
@@ -10,29 +16,29 @@
 #
 # Installation
 ################################################################################
-- import_tasks: 'tasks/vars-setup/{{zimbra_version}}.yml'
+- import_tasks: 'vars-setup/{{zimbra_version}}.yml'
   when: getent_passwd.rc == 2
-- import_tasks: 'tasks/install/dependencies.yml'
+- import_tasks: 'install/dependencies.yml'
   when: getent_passwd.rc == 2
-- import_tasks: 'tasks/install/zimbra.yml'
+- import_tasks: 'install/zimbra.yml'
   when: getent_passwd.rc == 2
-- import_tasks: 'tasks/install/policyd.yml'
+- import_tasks: 'install/policyd.yml'
   when: zimbra_policyd == 'y'
 
 #
 # Configuration
 ################################################################################
-- import_tasks: 'tasks/configure/proxy.yml'
+- import_tasks: 'configure/proxy.yml'
   when: zimbra_proxy == 'y'
-- import_tasks: 'tasks/configure/mailbox.yml'
+- import_tasks: 'configure/mailbox.yml'
   when: zimbra_store == 'y'
-- import_tasks: 'tasks/configure/mta.yml'
+- import_tasks: 'configure/mta.yml'
   when: zimbra_mta == 'y'
 
 #
 # Extras configuration
 ################################################################################
-- import_tasks: 'tasks/extras/modify-logo.yml'
+- import_tasks: 'extras/modify-logo.yml'
   when: zmlogologin is defined and zmlogoapp is defined
 
 #

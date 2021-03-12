@@ -1,0 +1,10 @@
+---
+- name: Install & configure Zimbra
+  hosts: mailservers
+  become: true
+  become_method: sudo
+  roles:
+    - role: zimbra
+      vars:
+        zimbra_version: 8.8.15
+...
